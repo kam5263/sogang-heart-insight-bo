@@ -94,6 +94,7 @@ def parse_kakao_chat(file_path, recent_chat_nums=1000):
                 'date': date_str,
                 'time': time_str,
                 'datetime': dt_obj,  # datetime 객체로 저장
+                'hour': hour,  # 시간대 분석을 위해 시간 추가
                 'speaker': speaker,
                 'content': content,
                 'has_question_mark': has_question,
@@ -166,6 +167,24 @@ def add_session_features(df, session_timeout_minutes=120, max_session_hours=12):
     
     return df
 
+def get_time_period(hour):
+    """
+    시간을 구간으로 분류하는 함수
+    
+    Parameters:
+    hour (int): 24시간 형식의 시간 (0-23)
+    
+    Returns:
+    str: 시간대 구간명
+    """
+    if 0 <= hour < 6:
+        return "새벽(00~06시)"
+    elif 6 <= hour < 12:
+        return "오전(06~12시)"
+    elif 12 <= hour < 18:
+        return "오후(12~18시)"
+    else:  # 18 <= hour < 24
+        return "밤(18~00시)"
 
 def calculate_conversation_metrics(df):
     """
@@ -240,7 +259,42 @@ def calculate_conversation_metrics(df):
     
     metrics['session_start_ratio'] = session_start_ratio_by_speaker
     
-    # 5. 종합 밀당 지수 계산
+    # 5. 시간대별 대화량 비율 계산 (새로 추가)
+    # 시간대 구간 추가
+    df['time_period'] = df['hour'].apply(get_time_period)
+    
+    # 발화자별, 시간대별 메시지 수 계산
+    timeframe_stats = df.groupby(['speaker', 'time_period']).size().unstack(fill_value=0)
+    
+    # 발화자별 총 메시지 수 계산
+    speaker_total_messages = df['speaker'].value_counts()
+    
+    # 발화자별 시간대 비율 계산 (%)
+    timeframe_ratio_by_speaker = {}
+    for speaker in df['speaker'].unique():
+        speaker_messages = speaker_total_messages[speaker]
+        if speaker_messages > 0:
+            # 해당 발화자의 시간대별 비율 계산
+            speaker_timeframe_ratio = {}
+            for time_period in ["새벽(00~06시)", "오전(06~12시)", "오후(12~18시)", "밤(18~00시)"]:
+                if time_period in timeframe_stats.columns and speaker in timeframe_stats.index:
+                    ratio = (timeframe_stats.loc[speaker, time_period] / speaker_messages) * 100
+                else:
+                    ratio = 0.0
+                speaker_timeframe_ratio[time_period] = ratio
+            timeframe_ratio_by_speaker[speaker] = speaker_timeframe_ratio
+        else:
+            # 메시지가 없는 경우 모든 시간대를 0으로 설정
+            timeframe_ratio_by_speaker[speaker] = {
+                "새벽(00~06시)": 0.0,
+                "오전(06~12시)": 0.0,
+                "오후(12~18시)": 0.0,
+                "밤(18~00시)": 0.0
+            }
+    
+    metrics['timeframe_ratio'] = timeframe_ratio_by_speaker
+    
+    # 6. 종합 밀당 지수 계산
     # 발화자 목록 추출
     speakers = df['speaker'].unique()
     
@@ -325,9 +379,15 @@ def extract_pattern_metrics(file_path, recent_chat_nums=1000):
     
     # 각 지표를 순회하며 JSON 직렬화가 가능한 형태로 변환
     for metric_name, metric_values in metrics.items():
-        # pandas Series를 딕셔너리로 변환
-        # 실제 발화자 이름을 키로 사용하고 값은 소수점 첫째자리까지만 반올림
-        result[metric_name] = {speaker: round(float(value), 1) for speaker, value in metric_values.items()}
+        if metric_name == 'timeframe_ratio':
+            # 시간대별 비율은 중첩된 딕셔너리 형태로 처리
+            result[metric_name] = {}
+            for speaker, timeframe_data in metric_values.items():
+                result[metric_name][speaker] = {period: round(float(ratio), 1) for period, ratio in timeframe_data.items()}
+        else:
+            # pandas Series를 딕셔너리로 변환
+            # 실제 발화자 이름을 키로 사용하고 값은 소수점 첫째자리까지만 반올림
+            result[metric_name] = {speaker: round(float(value), 1) for speaker, value in metric_values.items()}
     
     # Python 딕셔너리 반환 (이미 JSON 직렬화 가능한 형태)
     return result
