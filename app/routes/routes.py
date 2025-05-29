@@ -79,12 +79,19 @@ def analyze_mbti(id):
     partner_mbti = info["partner_mbti"] or None
     partner_gender = info["partner_gender"] or None
 
+    user_name = info["user_name"]
+    user_mbti = info["user_mbti"] or None
+    user_gender = info["user_gender"] or None
+
     mbti_str = f", MBTI는 {partner_mbti}" if partner_mbti else ""
     gender_str = f", 성별은 {partner_gender}" if partner_gender else ""
 
-    profile = f"파트너 이름은 {partner_name} {mbti_str} {gender_str}입니다"
+    p_profile = f"상대방 이름은 {partner_name} {mbti_str} {gender_str}입니다."
 
+    user_mbti_str = f", 나의 MBTI는 {user_mbti}" if user_mbti else ""
+    user_gender_str = f", 나의 성별은 {user_gender}" if user_gender else ""
     
+    profile = f"{p_profile} 나의 이름은 {user_name} {user_mbti_str} {user_gender_str}입니다"
 
     #content = data.get("content")
     file_path = os.path.join(UPLOAD_DIR, info["file_name"])

@@ -22,7 +22,7 @@ OpenAI의 GPT 모델을 활용하여 대화 내용을 분석하고 상대방의 
 ### 1. 저장소 클론
 ```bash
 git clone https://github.com/kam5263/sogang-heart-insight-bo.git
-cd mbti-analyzer
+cd sogang-heart-insight-bo
 ```
 
 ### 2. 가상환경 설정 및 의존성 설치
