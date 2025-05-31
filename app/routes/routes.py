@@ -102,9 +102,32 @@ def analyze_mbti(id):
     print(result)
     return jsonify({"result": result})
 
-@bp.route('/topic/<string:file_name>', methods=['GET'])
-def topic(file_name):
-    file_path = os.path.join(UPLOAD_DIR, file_name)
+# @bp.route('/topic/<string:file_name>', methods=['GET'])
+# def topic(file_name):
+#     file_path = os.path.join(UPLOAD_DIR, file_name)
+    
+#     result = extract_topic_metrics(file_path)
+#     return Response(
+#         json.dumps(result, ensure_ascii=False),
+#         content_type='application/json; charset=utf-8'
+#     )
+
+# @bp.route('/pattern/<string:file_name>', methods=['GET'])
+# def pattern(file_name):
+#     file_path = os.path.join(UPLOAD_DIR, file_name)
+    
+#     result = extract_pattern_metrics(file_path)
+#     return Response(
+#         json.dumps(result, ensure_ascii=False),
+#         content_type='application/json; charset=utf-8'
+#     )
+
+@bp.route('/topic/<string:id>', methods=['GET'])
+def topic(id):
+    db = get_db()
+    info = db.execute('SELECT * FROM info WHERE id = ?', (id,)).fetchone()
+
+    file_path = os.path.join(UPLOAD_DIR, info["file_name"])
     
     result = extract_topic_metrics(file_path)
     return Response(
@@ -112,9 +135,12 @@ def topic(file_name):
         content_type='application/json; charset=utf-8'
     )
 
-@bp.route('/pattern/<string:file_name>', methods=['GET'])
-def pattern(file_name):
-    file_path = os.path.join(UPLOAD_DIR, file_name)
+@bp.route('/pattern/<string:id>', methods=['GET'])
+def pattern(id):
+    db = get_db()
+    info = db.execute('SELECT * FROM info WHERE id = ?', (id,)).fetchone()
+
+    file_path = os.path.join(UPLOAD_DIR, info["file_name"])
     
     result = extract_pattern_metrics(file_path)
     return Response(

@@ -547,19 +547,3 @@ def extract_topic_metrics(chat_file_path: str, max_weeks: int = 6):
     #         print(f"  {topic}: {percentage:.1f}%")
     
     return result
-
-if __name__ == "__main__":
-    import sys
-    
-    if len(sys.argv) < 2:
-        print("사용법: python topic_analysis.py <카카오톡_채팅파일> [최대_주_수(기본값=6)]")
-        sys.exit(1)
-    
-    chat_file_path = sys.argv[1]
-    max_weeks = int(sys.argv[2]) if len(sys.argv) > 2 else 6
-    
-    result = main(chat_file_path, max_weeks)
-    
-    # 결과를 딕셔너리 형태로 반환
-    print("\n분석 결과 딕셔너리:")
-    print(result)
