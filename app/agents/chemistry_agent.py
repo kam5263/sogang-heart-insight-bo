@@ -66,7 +66,7 @@ class ChemistryAgent:
             "partner_mbti": partner_mbti,
             "chemistry_score": score,
             "chemistry_description": description if description else random.choice(chemistry_patterns),
-            "score_summary": f"**우리의 케미 점수: {score}점! ({score_desc}) [{type_description}]**",
+            "score_summary": f"**우리의 케미 점수: {score}점! ({score_desc})**",
             "warning_signal": f"⚠️ **위험 신호:** {warning}",
             "character_info": {
                 "user": user_char,
