@@ -10,6 +10,12 @@ from app.data.compatibility_matrix import COMPATIBILITY_MATRIX
 from app.data.warning_patterns import WARNING_PATTERNS, SPECIAL_WARNINGS
 from app.templates.prompts import PROMPT, SYSTEM_MESSAGE
 from app.utils.json_utils import result2json
+from app.agents.mbti_analyzer_agent import analyze_mbti_personality_with_agent
+
+
+def analyze_mbti_personality_with_agents(profile, content):
+    """Agent 구조를 사용한 새로운 분석 함수 (메인)"""
+    return analyze_mbti_personality_with_agent(profile, content)
 
 def get_chemistry_score(mbti1, mbti2):
     """초안 기반 케미 점수 계산"""

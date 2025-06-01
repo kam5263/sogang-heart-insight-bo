@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, Response
-from app.services.mbti_service import analyze_mbti_personality
+from app.services.mbti_service import analyze_mbti_personality_with_agents  # Agent 방식만 import
 from app.services.topic_analysis import extract_topic_metrics
 from app.services.conversation_pattern import extract_pattern_metrics
 import os
@@ -97,7 +97,8 @@ def analyze_mbti(id):
     file_path = os.path.join(UPLOAD_DIR, info["file_name"])
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
-    result = analyze_mbti_personality(profile, file_path)
+    # result = analyze_mbti_personality(profile, file_path)
+    result = analyze_mbti_personality_with_agents(profile, content)
 
     print(result)
     return jsonify({"result": result})
